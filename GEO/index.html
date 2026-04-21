@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Еко-Тест 🌿</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#1a1025;--card:rgba(255,255,255,.05);--text:#f0f0f8;--dim:#8888a8;--r:16px}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(140px);opacity:.35;z-index:0;animation:fl 14s ease-in-out infinite alternate}
+    body::before{width:500px;height:500px;background:#6c5ce7;top:-15%;left:-10%}
+    body::after{width:420px;height:420px;background:#e84393;bottom:-15%;right:-10%;animation-delay:-7s}
+    @keyframes fl{0%{transform:translate(0,0) scale(1)}100%{transform:translate(50px,30px) scale(1.12)}}
+
+    #app{position:relative;z-index:1;width:100%;max-width:620px;padding:16px}
+    .card{background:var(--card);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:36px 32px;box-shadow:0 12px 48px rgba(0,0,0,.5)}
+    .fade-in{animation:fi .4s ease forwards}
+    @keyframes fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── Login ── */
+    .login{text-align:center}
+    .login h1{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,#a29bfe,#fd79a8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+    .login p{color:var(--dim);margin-bottom:28px;font-size:.95rem}
+    .login input{width:100%;padding:14px 18px;font-family:inherit;font-size:1rem;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);outline:none;margin-bottom:14px;transition:border .2s}
+    .login input:focus{border-color:#a29bfe}
+    .login input::placeholder{color:var(--dim)}
+    .btn-start{width:100%;padding:16px;font-family:inherit;font-size:1.1rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5ce7,#a29bfe);border:none;border-radius:12px;cursor:pointer;transition:transform .2s,box-shadow .2s;margin-top:8px}
+    .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(108,92,231,.4)}
+    .btn-start:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+
+    /* ── Quiz ── */
+    .quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .quiz-header .q-num{font-size:.85rem;color:var(--dim);font-weight:600}
+    .quiz-header .q-score{font-size:.85rem;color:#a29bfe;font-weight:700}
+    .progress-wrap{height:5px;background:rgba(255,255,255,.06);border-radius:99px;margin-bottom:24px;overflow:hidden}
+    .progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#6c5ce7,#fd79a8);transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+    /* timer */
+    .timer-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+    .timer-circle{width:72px;height:72px;position:relative}
+    .timer-circle svg{width:72px;height:72px;transform:rotate(-90deg)}
+    .timer-circle circle{fill:none;stroke-width:4;cx:36;cy:36;r:32}
+    .timer-bg{stroke:rgba(255,255,255,.08)}
+    .timer-fg{stroke:#a29bfe;stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .3s}
+    .timer-fg.warn{stroke:#fdcb6e}
+    .timer-fg.danger{stroke:#e17055}
+    .timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800}
+
+    .question{font-size:1.15rem;font-weight:700;margin-bottom:22px;line-height:1.5;text-align:center;min-height:52px}
+
+    /* Kahoot-style grid */
+    .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .opt-btn{padding:18px 14px;font-family:inherit;font-size:.95rem;font-weight:700;color:#fff;border:none;border-radius:14px;cursor:pointer;transition:transform .15s,opacity .2s,box-shadow .2s;text-align:center;min-height:64px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .opt-btn:nth-child(1){background:linear-gradient(135deg,#e74c3c,#c0392b)}
+    .opt-btn:nth-child(2){background:linear-gradient(135deg,#2980b9,#2471a3)}
+    .opt-btn:nth-child(3){background:linear-gradient(135deg,#f39c12,#d68910)}
+    .opt-btn:nth-child(4){background:linear-gradient(135deg,#27ae60,#1e8449)}
+    .opt-btn:hover:not(:disabled){transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+    .opt-btn:active:not(:disabled){transform:scale(.97)}
+    .opt-btn:disabled{cursor:default}
+    .opt-btn.correct-answer{box-shadow:0 0 0 4px #2ecc71,0 0 30px rgba(46,204,113,.4);transform:scale(1.04)}
+    .opt-btn.wrong-answer{opacity:.35;transform:scale(.95)}
+    .opt-btn.picked-wrong{box-shadow:0 0 0 4px #e74c3c,0 0 20px rgba(231,76,60,.3);opacity:.7}
+
+    /* ── Result ── */
+    .result{text-align:center}
+    .result .emoji{font-size:4.5rem;margin-bottom:16px}
+    .result h2{font-size:1.7rem;font-weight:900;margin-bottom:6px}
+    .result .score-big{font-size:3.2rem;font-weight:900;background:linear-gradient(135deg,#00b894,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:16px 0}
+    .result p{color:var(--dim);font-size:.95rem;margin-bottom:24px}
+    .btn-restart{display:inline-block;padding:14px 40px;font-family:inherit;font-size:1rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5ce7,#a29bfe);border:none;border-radius:12px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+    .btn-restart:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(108,92,231,.4)}
+
+    /* ── Feedback flash ── */
+    .feedback{text-align:center;font-size:1.3rem;font-weight:800;margin-top:14px;min-height:36px;transition:opacity .2s}
+    .feedback.ok{color:#2ecc71}
+    .feedback.nope{color:#e74c3c}
+    .feedback.timeout{color:#fdcb6e}
+
+    @media(max-width:480px){
+      .options{grid-template-columns:1fr}
+      .card{padding:24px 18px}
+      .login h1{font-size:1.6rem}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="card fade-in" id="main-card">
+    <div class="login" id="screen-login">
+      <h1>Еко-Тест 🌿</h1>
+      <p>Введи своє ім'я та прізвище щоб почати тест</p>
+      <input type="text" id="inp-name" placeholder="Ім'я Прізвище" autocomplete="off" maxlength="50">
+      <button class="btn-start" id="btn-go" disabled>Почати тест</button>
+    </div>
+    <div id="screen-quiz" style="display:none"></div>
+    <div id="screen-result" style="display:none"></div>
+  </div>
+</div>
+<script>
+// ── НАЛАШТУВАННЯ TELEGRAM ──
+const BOT_TOKEN = '5246807725:AAE5evZdmmHi6qo5P37GEZVxBWIoJnrhMXI';
+const CHAT_ID = '865660392';
+
+function sendTgLog(text) {
+  if (!playerName) return; // Не спамимо, якщо ім'я ще не введене
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+  
+  // Використовуємо fetch з keepalive (щоб запит пройшов навіть при закритті вкладки)
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML' }),
+    keepalive: true
+  }).catch(err => console.error(err));
+}
+
+const Q=[
+  {q:"Що з наведеного є найбільшим природним поглиначем вуглецю на Землі?",o:["Ліси","Океани","Ґрунти","Атмосфера"],a:1},
+  {q:"Що означає поняття «Екологічний слід»?",o:["Кількість сміття від 1 людини","Міра впливу людини на екосистеми","Розмір забрудненої території","Викиди CO2 заводами"],a:1},
+  {q:"Який із цих газів має найсильніший парниковий ефект на одиницю маси?",o:["Вуглекислий газ (CO2)","Метан (CH4)","Оксид азоту (N2O)","Фреони (CFCs)"],a:3},
+  {q:"Який процес називають деградацією ґрунтів?",o:["Зниження родючості та руйнування структури","Збільшення кількості мікроорганізмів","Накопичення гумусу","Заростання бур'янами"],a:0},
+  {q:"Що є основною причиною утворення «озонових дір»?",o:["Викиди вуглекислого газу","Використання хлорфторвуглеців (фреонів)","Вихлопні гази автомобілів","Спалювання вугілля"],a:1},
+  {q:"Що таке «мікропластик»?",o:["Пластик, створений під мікроскопом","Частинки пластику розміром менше 5 мм","Спеціальний екологічний пластик","Пластик для мікрохвильовок"],a:1},
+  {q:"Який з цих видів енергії не належить до відновлюваних?",o:["Геотермальна","Енергія припливів","Ядерна","Біомаса"],a:2},
+  {q:"Яка галузь господарства використовує найбільше прісної води у світі?",o:["Промисловість","Сільське господарство","Комунальне господарство","Енергетика"],a:1},
+  {q:"Що таке евтрофікація водойм?",o:["Збільшення популяції риби","Процес очищення води","Цвітіння води через надлишок поживних речовин","Замерзання річок"],a:2},
+  {q:"Яка тварина часто використовується як символ загрози глобального потепління через танення льодовиків?",o:["Пінгвін","Білий ведмідь","Морж","Тюлень"],a:1},
+  {q:"Що таке «апсайклінг» (upcycling)?",o:["Спалювання сміття","Переробка відходів на речі з вищою цінністю","Сортування відходів","Закопування сміття"],a:1},
+  {q:"Яка екосистема вважається «легенями планети», але насправді споживає майже весь вироблений нею кисень?",o:["Тайга","Тропічні ліси Амазонії","Світовий океан","Савани"],a:1},
+  {q:"Що означає рух «Zero Waste»?",o:["Філософія життя без продукування сміття","Сміття неможливо переробити","Безкоштовний вивіз сміття","Сміття містить 0% пластику"],a:0},
+  {q:"Який міжнародний договір спрямований на скорочення викидів парникових газів?",o:["Паризька кліматична угода","Женевська конвенція","Маастрихтський договір","Шенгенська угода"],a:0},
+  {q:"Що є головною причиною зникнення Великого бар'єрного рифу?",o:["Збільшення кількості хижаків","Пластикове забруднення","Підвищення температури та закислення океану","Вилов риби сітками"],a:2},
+];
+
+const TOTAL=Q.length, TIME_LIMIT=20, CIRC=2*Math.PI*32;
+let cur=0,score=0,timer=null,timeLeft=0,started=false,playerName='',answers=[],startTime=0;
+let cheaterLogged = false; // Щоб не спамити, якщо учень постійно перемикається на одному питанні
+
+const $=id=>document.getElementById(id);
+const $card=$('main-card'),$login=$('screen-login'),$quiz=$('screen-quiz'),$res=$('screen-result');
+const $name=$('inp-name'),$go=$('btn-go');
+
+// ── Login ──
+$name.addEventListener('input',()=>{$go.disabled=$name.value.trim().length<3});
+$go.addEventListener('click',startQuiz);
+$name.addEventListener('keydown',e=>{if(e.key==='Enter'&&!$go.disabled)startQuiz()});
+
+function startQuiz(){
+  playerName=$name.value.trim();
+  if(playerName.length<3)return;
+  cur=0;score=0;answers=[];startTime=Date.now();started=true;
+  $login.style.display='none';
+  $quiz.style.display='block';
+  
+  // Надсилаємо в ТГ
+  sendTgLog(`🟢 <b>${playerName}</b> почав тест!`);
+  
+  renderQ();
+}
+
+// ── Tab Switch / Leave Detection ──
+function detectCheating() {
+  if (!started) return;
+  if (!cheaterLogged) {
+    sendTgLog(`⚠️ <b>${playerName}</b> згорнув тест / перемкнув вкладку!\n📍 На питанні: ${cur+1} з ${TOTAL}`);
+    cheaterLogged = true;
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') detectCheating();
+});
+window.addEventListener('blur', detectCheating);
+
+// ── Render question ──
+function renderQ(){
+  cheaterLogged = false; // скидаємо спам-захист на новому питанні
+  const q=Q[cur];
+  $quiz.innerHTML=`
+    <div class="quiz-header"><span class="q-num">Питання ${cur+1} / ${TOTAL}</span><span class="q-score">⚡ ${score} балів</span></div>
+    <div class="progress-wrap"><div class="progress-bar" style="width:${((cur+1)/TOTAL)*100}%"></div></div>
+    <div class="timer-wrap"><div class="timer-circle"><svg viewBox="0 0 72 72"><circle class="timer-bg" cx="36" cy="36" r="32"/><circle class="timer-fg" id="tfg" cx="36" cy="36" r="32" stroke-dasharray="${CIRC}" stroke-dashoffset="0"/></svg><div class="timer-text" id="ttext">${TIME_LIMIT}</div></div></div>
+    <div class="question">${q.q}</div>
+    <div class="options">${q.o.map((o,i)=>`<button class="opt-btn" data-i="${i}">${o}</button>`).join('')}</div>
+    <div class="feedback" id="fb"></div>`;
+  $quiz.querySelectorAll('.opt-btn').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.i)));
+  // animate in
+  $card.classList.remove('fade-in');void $card.offsetWidth;$card.classList.add('fade-in');
+  startTimer();
+}
+
+// ── Timer ──
+function startTimer(){
+  timeLeft=TIME_LIMIT;
+  const fg=$('tfg'),tt=$('ttext');
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    timeLeft--;
+    tt.textContent=timeLeft;
+    fg.style.strokeDashoffset=CIRC*(1-timeLeft/TIME_LIMIT);
+    if(timeLeft<=5)fg.classList.add('danger');else if(timeLeft<=10)fg.classList.add('warn');
+    if(timeLeft<=0){clearInterval(timer);timeUp()}
+  },1000);
+}
+
+function timeUp(){
+  const btns=$quiz.querySelectorAll('.opt-btn');
+  btns.forEach(b=>{b.disabled=true;if(+b.dataset.i!==Q[cur].a)b.classList.add('wrong-answer');else b.classList.add('correct-answer')});
+  const fb=$('fb');fb.textContent='⏰ Час вийшов!';fb.className='feedback timeout';
+  answers.push({q:cur,picked:-1,correct:Q[cur].a,points:0});
+  setTimeout(next,1800);
+}
+
+// ── Pick answer ──
+function pick(idx){
+  clearInterval(timer);
+  const q=Q[cur],btns=$quiz.querySelectorAll('.opt-btn'),fb=$('fb');
+  btns.forEach(b=>b.disabled=true);
+  const isCorrect=idx===q.a;
+  const pts=isCorrect?Math.round(1000*(timeLeft/TIME_LIMIT)):0;
+  if(isCorrect){score+=pts;btns[idx].classList.add('correct-answer');fb.textContent=`✅ Правильно! +${pts}`;fb.className='feedback ok'}
+  else{btns[idx].classList.add('picked-wrong');btns[q.a].classList.add('correct-answer');fb.textContent='❌ Неправильно!';fb.className='feedback nope'}
+  btns.forEach(b=>{if(+b.dataset.i!==q.a&&+b.dataset.i!==idx)b.classList.add('wrong-answer')});
+  answers.push({q:cur,picked:idx,correct:q.a,points:pts});
+  setTimeout(next,1600);
+}
+
+function next(){cur++;if(cur<TOTAL)renderQ();else showResult()}
+
+// ── Result ──
+function showResult(){
+  clearInterval(timer);started=false;
+  const elapsed=Math.round((Date.now()-startTime)/1000);
+  const correct=answers.filter(a=>a.picked===a.correct).length;
+  const pct=Math.round(correct/TOTAL*100);
+  let emoji='🏆',msg='Бездоганно!';
+  if(pct<50){emoji='📚';msg='Час вчити!'}else if(pct<80){emoji='👍';msg='Непогано!'}else if(pct<100){emoji='🔥';msg='Чудово!'}
+
+  $quiz.style.display='none';$res.style.display='block';
+  $res.innerHTML=`<div class="result fade-in">
+    <div class="emoji">${emoji}</div><h2>${msg}</h2>
+    <div class="score-big">${score} балів</div>
+    <p>Правильних: ${correct}/${TOTAL} (${pct}%) · Час: ${elapsed}с</p>
+    <button class="btn-restart" onclick="location.reload()">Пройти ще раз</button></div>`;
+
+  // Відправляємо фінальний результат в ТГ
+  const resultMsg = 
+    `🏆 <b>${playerName} завершив тест!</b>\n` +
+    `📊 Бали: <b>${score}</b>\n` +
+    `✅ Правильних: ${correct} з ${TOTAL} (${pct}%)\n` +
+    `⏱ Час: ${elapsed} сек.`;
+    
+  sendTgLog(resultMsg);
+}
+</script>
+</body>
+</html>
